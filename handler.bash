@@ -5,6 +5,8 @@ set -euo pipefail
 cd "$(dirname "$(realpath "${0}")")" || exit
 
 source internal.bash
+source session.bash
+
 source core.bash
 source config.bash
 
@@ -165,6 +167,15 @@ if [[ -n "${COOKIE_HEADER}" ]]; then
   done
 fi
 unset _key _val _p _pairs
+
+declare -A SESSION
+export SESSION
+
+if [[ -n "${COOKIES[session]:-}" ]]; then
+  session_load_from_cookie || true
+fi
+
+export SESSION_ID SESSION_EXPIRES
 
 for _f in ./middleware.d/* ; do
   if [[ -f "${_f}" ]] ; then

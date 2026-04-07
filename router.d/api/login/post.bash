@@ -9,7 +9,12 @@ if [[ "$username" == "admin" && "$password" == "1234" ]]; then
   body='{"status":"ok"}'
   status=200
   msg="Ok"
-  set_cookie "session" "abc123" "Path=/; HttpOnly; Max-Age=3600"
+
+  session_new
+  session_put "username" "$username"
+  session_put "role" "admin"
+  session_save
+  set_session_cookie
 else
   body='{"status":"fail"}'
   status=401

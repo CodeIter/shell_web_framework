@@ -47,6 +47,23 @@ urldecode() {
   printf '%b' "${s//%/\\x}"
 }
 
+# URL-encode helper
+urlencode() {
+  local s="$1" out="" c hex i
+  for ((i=0; i<${#s}; i++)); do
+    c="${s:i:1}"
+    case "$c" in
+      [a-zA-Z0-9.~_-]) out+="$c" ;;
+      ' ') out+='+' ;;
+      *)
+        printf -v hex '%02X' "'$c"
+        out+="%$hex"
+        ;;
+    esac
+  done
+  printf '%s' "$out"
+}
+
 # Simple JSON getter using jq
 json_get() {
   local key="$1"
@@ -55,6 +72,55 @@ json_get() {
   else
     return 1
   fi
+}
+
+now_epoch() {
+  date +%s
+}
+
+rand_hex() {
+  if command -v openssl >/dev/null 2>&1; then
+    openssl rand -hex 16
+  else
+    od -An -N16 -tx1 /dev/urandom | tr -d ' \n'
+  fi
+}
+
+hmac_sha256_hex() {
+  local data="$1"
+  printf '%s' "$data" \
+    | openssl dgst -sha256 -hmac "${SESSION_SECRET}" -binary \
+    | od -An -tx1 \
+    | tr -d ' \n'
+}
+
+sign_payload() {
+  local payload="$1" sig
+  sig="$(hmac_sha256_hex "$payload")"
+  printf '%s.%s' "$payload" "$sig"
+}
+
+verify_payload() {
+  local token="$1" payload sig expected
+  [[ "$token" == *.* ]] || return 1
+  payload="${token%.*}"
+  sig="${token##*.}"
+  expected="$(hmac_sha256_hex "$payload")"
+  [[ "$sig" == "$expected" ]]
+}
+
+set_signed_cookie() {
+  local name="$1"
+  local payload="$2"
+  local opts="${3:-Path=/; HttpOnly; SameSite=Lax}"
+  local token
+  token="$(sign_payload "$payload")"
+  set_cookie "$name" "$token" "$opts"
+}
+
+clear_cookie() {
+  local name="$1"
+  set_cookie "$name" "" "Path=/; HttpOnly; SameSite=Lax; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT"
 }
 
 # Return MIME type for a filename (prints to stdout)
