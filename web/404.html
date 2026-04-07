@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>404 — Page Not Found</title>
+  <meta name="description" content="404 — The page you are looking for can't be found." />
+  <style>
+    :root{
+      --bg:#0f1724;
+      --card:#0b1220;
+      --accent:#7dd3fc;
+      --muted:#94a3b8;
+      --glass: rgba(255,255,255,0.04);
+      --radius:14px;
+      color-scheme: dark;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background:
+        radial-gradient(1200px 600px at 10% 20%, rgba(125,211,252,0.06), transparent 8%),
+        radial-gradient(1000px 500px at 90% 80%, rgba(139,92,246,0.04), transparent 6%),
+        var(--bg);
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:32px;
+      color:#e6eef8;
+      line-height:1.35;
+    }
+
+    .container{
+      width:100%;
+      max-width:980px;
+      background:linear-gradient(180deg,var(--card), rgba(255,255,255,0.01));
+      border-radius:var(--radius);
+      padding:36px;
+      box-shadow: 0 10px 30px rgba(2,6,23,0.6), inset 0 1px 0 rgba(255,255,255,0.02);
+      display:grid;
+      grid-template-columns: 1fr 420px;
+      gap:28px;
+      align-items:center;
+    }
+
+    /* responsive */
+    @media (max-width:880px){
+      .container{grid-template-columns:1fr; padding:28px}
+      .art{order:-1; text-align:center}
+    }
+
+    .content h1{
+      margin:0 0 8px 0;
+      font-size:clamp(28px,4.6vw,44px);
+      letter-spacing:-0.02em;
+    }
+    .code{
+      display:inline-block;
+      font-weight:700;
+      font-family:monospace;
+      color:var(--accent);
+      background:linear-gradient(90deg, rgba(125,211,252,0.08), rgba(125,211,252,0.03));
+      padding:6px 10px;
+      border-radius:8px;
+      margin-right:10px;
+      font-size:0.95rem;
+    }
+    .muted{
+      color:var(--muted);
+      font-size:0.98rem;
+    }
+    .desc{margin-top:16px; color:var(--muted); max-width:56ch}
+    .actions{margin-top:22px; display:flex; gap:12px; flex-wrap:wrap}
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      padding:10px 14px;
+      border-radius:10px;
+      text-decoration:none;
+      cursor:pointer;
+      user-select:none;
+      border:1px solid transparent;
+      font-weight:600;
+      font-size:0.95rem;
+      transition:transform .14s ease, box-shadow .14s ease;
+      background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      color:#eaf6ff;
+    }
+    .btn:active{transform:translateY(1px)}
+    .btn-primary{
+      background:linear-gradient(90deg, #4fd1c5, #60a5fa);
+      color:#04263b;
+      box-shadow: 0 6px 18px rgba(96,165,250,0.12), 0 1px 0 rgba(255,255,255,0.04) inset;
+    }
+    .btn-ghost{
+      background:transparent;
+      border:1px solid rgba(255,255,255,0.04);
+      color:var(--accent);
+    }
+
+    /* artwork */
+    .art{
+      background:linear-gradient(180deg, rgba(255,255,255,0.015), rgba(255,255,255,0.01));
+      padding:22px;
+      border-radius:12px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:18px;
+      position:relative;
+      min-height:220px;
+    }
+
+    .scene{
+      width:320px;
+      height:180px;
+      position:relative;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      transform-style:preserve-3d;
+      perspective:900px;
+    }
+
+    .planet{
+      width:120px;
+      height:120px;
+      border-radius:50%;
+      background: radial-gradient(circle at 35% 25%, #9be7ff 0%, #60a5fa 30%, #1e293b 100%);
+      box-shadow: 0 10px 30px rgba(2,6,23,0.6), inset -10px -8px 30px rgba(255,255,255,0.04);
+      position:relative;
+      transform:translateZ(30px);
+      animation:float 6s ease-in-out infinite;
+    }
+    .planet::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      border-radius:50%;
+      background:conic-gradient(from 180deg at 50% 50%, rgba(255,255,255,0.05), transparent 30%);
+      mix-blend-mode:overlay;
+      pointer-events:none;
+    }
+
+    .ring{
+      position:absolute;
+      width:220px;
+      height:32px;
+      border-radius:999px;
+      border:2px solid rgba(125,211,252,0.12);
+      transform:rotateX(65deg) rotateZ(-20deg) translateZ(10px);
+      left:50%;
+      top:50%;
+      margin-left:-110px;
+      margin-top:-6px;
+      filter:blur(0.6px);
+      animation:spin 12s linear infinite;
+    }
+
+    .sat{
+      width:18px;
+      height:18px;
+      border-radius:50%;
+      background:linear-gradient(180deg,#ffd79e,#ffb86b);
+      position:absolute;
+      left:18%;
+      top:28%;
+      box-shadow:0 6px 18px rgba(0,0,0,0.45);
+      transform:translateZ(50px);
+      animation:orbit 8s linear infinite;
+    }
+
+    .stars{
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+    }
+    .star{
+      position:absolute;
+      width:4px;height:4px;border-radius:2px;background:rgba(255,255,255,0.85);
+      box-shadow:0 0 12px rgba(125,211,252,0.12);
+      opacity:0.9;
+      transform:translateZ(0);
+      animation:twinkle 4s linear infinite;
+    }
+    .star.s1{left:8%; top:12%; animation-delay:-0.8s}
+    .star.s2{left:20%; top:40%; animation-delay:-1.4s}
+    .star.s3{left:38%; top:18%; animation-delay:-0.2s}
+    .star.s4{left:64%; top:8%; animation-delay:-0.6s}
+    .star.s5{left:82%; top:34%; animation-delay:-1.2s}
+
+    @keyframes float{
+      0%,100%{transform:translateY(0) translateZ(30px)}
+      50%{transform:translateY(-10px) translateZ(30px)}
+    }
+    @keyframes spin{
+      from{transform:rotateX(65deg) rotateZ(-20deg) translateZ(10px) rotate(0)}
+      to{transform:rotateX(65deg) rotateZ(-20deg) translateZ(10px) rotate(360deg)}
+    }
+    @keyframes orbit{
+      0%{transform:translateZ(60px) translateX(-90px) rotate(0deg)}
+      100%{transform:translateZ(60px) translateX(-90px) rotate(360deg)}
+    }
+    @keyframes twinkle{
+      0%,100%{opacity:0.95; transform:scale(1)}
+      50%{opacity:0.35; transform:scale(0.7)}
+    }
+
+    /* small footer line */
+    .footerline{
+      margin-top:18px;
+      font-size:0.82rem;
+      color:var(--muted);
+    }
+
+    /* accessibility: reduce motion */
+    @media (prefers-reduced-motion: reduce){
+      .planet, .ring, .sat, .star, .scene { animation: none; transition: none }
+    }
+  </style>
+</head>
+<body>
+  <main class="container" role="main" aria-labelledby="title" aria-describedby="desc">
+    <section class="content" aria-hidden="false">
+      <div class="code" aria-hidden="true">404</div>
+      <h1 id="title">Page not found</h1>
+      <p id="desc" class="desc">We can't find the page you were looking for. It may have been moved, renamed, or never existed.</p>
+
+      <div class="actions" role="group" aria-label="404 actions">
+        <a class="btn btn-primary" href="/" title="Go to home">
+          Home
+        </a>
+        <a class="btn btn-ghost" href="javascript:history.back()" title="Go back">
+          Go back
+        </a>
+        <a class="btn" href="/contact" title="Contact support">
+          Contact
+        </a>
+      </div>
+
+      <p class="footerline" aria-hidden="true">If you typed the web address, check it — there may be a typo.</p>
+    </section>
+
+    <aside class="art" aria-hidden="true">
+      <div class="scene" role="img" aria-label="Illustration: a small planet with ring and stars">
+        <div class="planet" aria-hidden="true"></div>
+        <div class="ring" aria-hidden="true"></div>
+        <div class="sat" aria-hidden="true"></div>
+
+        <div class="stars" aria-hidden="true">
+          <div class="star s1"></div>
+          <div class="star s2"></div>
+          <div class="star s3"></div>
+          <div class="star s4"></div>
+          <div class="star s5"></div>
+        </div>
+      </div>
+    </aside>
+  </main>
+</body>
+</html>
+
