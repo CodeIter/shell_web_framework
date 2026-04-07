@@ -28,6 +28,44 @@ print_crnl() {
   printf '\r\n'
 }
 
+# HTTP redirect helper
+redirect() {
+  local url="$1"
+  local status="${2:-302}"
+  local msg
+  case "$status" in
+    301) msg="Moved Permanently" ;;
+    302) msg="Found" ;;
+    303) msg="See Other" ;;
+    307) msg="Temporary Redirect" ;;
+    308) msg="Permanent Redirect" ;;
+    *)   msg="Redirect" ;;
+  esac
+  # Minimal HTML body (good for browsers / debugging)
+  local body="<html><body>Redirecting to <a href=\"${url}\">${url}</a></body></html>"
+  HEADERS["location"]="${url}"
+  HEADERS["content-type"]="text/html"
+  HEADERS["content-length"]="${#body}"
+  HEADERS["connection"]="close"
+  print_status "${status}" "${msg}"
+  print_headers
+  print_crnl
+  printf '%s' "${body}"
+  exit 0
+}
+
+redirect_abs() {
+  local path="$1"
+  local status="${2:-302}"
+  local host="${REQUEST_HEADERS[host]:-localhost}"
+  local scheme="http"
+  # If behind nginx/https proxy
+  if [[ "${REQUEST_HEADERS[x-forwarded-proto]:-}" == "https" ]]; then
+    scheme="https"
+  fi
+  redirect "${scheme}://${host}${path}" "${status}"
+}
+
 # Cookies helper
 set_cookie() {
   local name="$1"
