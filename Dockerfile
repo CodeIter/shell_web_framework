@@ -41,5 +41,5 @@ ENV HOST=0.0.0.0
 ENV PORT=8080
 
 # Start the server
-CMD ["bash", "server.bash"]
+ENTRYPOINT ["/bin/bash", "server.bash"]
 
