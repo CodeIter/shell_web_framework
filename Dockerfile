@@ -37,7 +37,7 @@ USER appuser
 EXPOSE 8080
 
 # Environment defaults (can be overridden)
-ENV HOST=0.0.0.0
+ENV HOST=127.0.0.1
 ENV PORT=8080
 
 # Start the server
