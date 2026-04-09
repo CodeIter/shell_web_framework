@@ -62,10 +62,15 @@ if [[ -n "${_xff}" ]] ; then
   _xff="${_xff#"${_xff%%[![:space:]]*}"}"
   _xff="${_xff%"${_xff##*[![:space:]]}"}"
 fi
-REMOTE_ADDR="$(_pick "${_xff}" "${_xreal}" "${SOCAT_PEERADDR:-}" "${NCAT_REMOTE_ADDR:-}" "${NCAT_REMOTE_IP:-}")"
+export REMOTE_ADDR="$(_pick "${_xff}" "${_xreal}" "${SOCAT_PEERADDR:-}" "${NCAT_REMOTE_ADDR:-}" "${NCAT_REMOTE_IP:-}")"
 REMOTE_ADDR="${REMOTE_ADDR:-unknown}"
-REMOTE_PORT="$(_pick "${REQUEST_HEADERS[x-forwarded-port]:-}" "${REQUEST_HEADERS[x-real-port]:-}" "${SOCAT_PEERPORT:-}" "${NCAT_REMOTE_PORT:-}")"
+export REMOTE_PORT="$(_pick "${REQUEST_HEADERS[x-forwarded-port]:-}" "${REQUEST_HEADERS[x-real-port]:-}" "${SOCAT_PEERPORT:-}" "${NCAT_REMOTE_PORT:-}")"
 REMOTE_PORT="${REMOTE_PORT:-unknown}"
+export REMOTE_PROTO="$(_pick "${REQUEST_HEADERS[x-forwarded-proto]:-}" "http")"
+export REMOTE_HOST="$(_pick "${REQUEST_HEADERS[x-forwarded-host]:-}" "${REQUEST_HEADERS[host]}")"
+
+REMOTE_PROTO="${REMOTE_PROTO,,}"
+REMOTE_HOST="${REMOTE_HOST,,}"
 
 export METHOD=$(awk '{print $1}' <<<"${REQUEST_LINE}")
 export REQUEST_URI=$(awk '{print $2}' <<<"${REQUEST_LINE}")
