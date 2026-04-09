@@ -25,7 +25,7 @@ print_response() {
   local msg="${3}"
   local body="${4}"
   HEADERS["content-type"]="${mimetype}"
-  HEADERS["content-length"]="$(stat -c%s <(printf '%s' "${body}") 2>/dev/null || wc -c < <(printf '%s' "${body}"))"
+  HEADERS["content-length"]="${#body}"
   HEADERS["connection"]="close"
   print_status "${status}" "${msg}"
   print_headers
