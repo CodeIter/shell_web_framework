@@ -2,6 +2,38 @@
 
 set -euo pipefail
 
+# print header+body html response
+print_response_html(){
+  local status="${1}"
+  local msg="${2}"
+  local body="${3}"
+  print_response "${status}" "text/html" "${msg}" "${body}"
+}
+
+# print header+body json response
+print_response_json(){
+  local status="${1}"
+  local msg="${2}"
+  local body="${3}"
+  print_response "${status}" "application/json" "${msg}" "${body}"
+}
+
+# print header+body response
+print_response() {
+  local status="${1}"
+  local mimetype="${2}"
+  local msg="${3}"
+  local body="${4}"
+  HEADERS["content-type"]="${mimetype}"
+  HEADERS["content-length"]="$(stat -c%s <(printf '%s' "${body}") 2>/dev/null || wc -c < <(printf '%s' "${body}"))"
+  HEADERS["connection"]="close"
+  print_status "${status}" "${msg}"
+  print_headers
+  print_crnl
+  printf '%s' "${body}"
+  exit 0
+}
+
 # Print status
 print_status() {
   printf '%s %s %s\n\r' "HTTP/1.1" "${1:-200}" "${2:-OK}"

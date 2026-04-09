@@ -21,14 +21,7 @@ else
   msg="Unauthorized"
 fi
 
-HEADERS["content-type"]="application/json"
-HEADERS["content-length"]="${#body}"
-HEADERS["connection"]="close"
-
-print_status "${status}" "${msg}"
-print_headers
-print_crnl
-printf '%s' "$body"
+print_response_json "${status}" "${msg}" "${body}"
 
 exit 0
 
