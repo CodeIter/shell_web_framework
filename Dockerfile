@@ -19,7 +19,7 @@ WORKDIR /app
 COPY . .
 
 # Copy and activate nginx reverse-proxy config
-COPY proxy.nginx /etc/nginx/conf.d/default.conf
+RUN mv -f proxy.nginx /etc/nginx/conf.d/default.conf
 
 # Make scripts executable
 RUN find . -type f \( -name "*.bash" -o -name "*.sh" \) \
