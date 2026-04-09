@@ -90,7 +90,7 @@ if [[ -z "${WEBPATH}" ]]; then
   export WEBPATH="/"
 fi
 
-WEBPATH="$(sed -sure 's~\.~~g;s~/+~/~g' <<< "${WEBPATH}")"
+WEBPATH="$(sed -sure 's~/\.\.?/~/~g;s~/+~/~g' <<< "${WEBPATH}")"
 
 export ROOT="${PWD}/web"
 
@@ -199,17 +199,22 @@ elif [[ -f "./router.d${WEBPATH}/${METHOD}.bash" ]] ; then
 fi
 
 if [[ -f "${FILE}" ]]; then
-  _ct="$(mime_type "${FILE}")"
-  SIZE=$(stat -c%s "${FILE}" 2>/dev/null || wc -c <"${FILE}")
-  HEADERS["content-type"]="${_ct}"
-  HEADERS["content-length"]="${SIZE}"
-  HEADERS["connection"]="close"
-  print_status "200" "OK"
-  print_headers
-  print_crnl
-  cat "${FILE}"
+  if [[ "${FILE##*.}" = "sh" ]] || [[ "${FILE##*.}" = "bash" ]] ; then
+    source "${FILE}"
+  else
+    _ct="$(mime_type "${FILE}")"
+    SIZE=$(stat -c%s "${FILE}" 2>/dev/null || wc -c <"${FILE}")
+    HEADERS["content-type"]="${_ct}"
+    HEADERS["content-length"]="${SIZE}"
+    HEADERS["connection"]="close"
+    print_status "200" "OK"
+    print_headers
+    print_crnl
+    cat "${FILE}"
+  fi
 elif [[ -d "${ROOT}/${WEBPATH}" ]] ; then
   for _f in "${ROOT}/${WEBPATH}"/*.sh "${ROOT}/${WEBPATH}"/*.bash ; do
+    [[ -f "${_f}" ]] || continue
     source "${_f}"
   done
   unset _f
