@@ -9,7 +9,8 @@ RUN apk add --no-cache \
     coreutils \
     openssl \
     jq \
-    ca-certificates
+    ca-certificates \
+    nginx
 
 # Set working directory
 WORKDIR /app
@@ -17,11 +18,14 @@ WORKDIR /app
 # Copy project files
 COPY . .
 
+# Copy and activate nginx reverse-proxy config
+COPY proxy.nginx /etc/nginx/conf.d/default.conf
+
 # Make scripts executable
 RUN find . -type f \( -name "*.bash" -o -name "*.sh" \) \
            -exec chmod a+x {} +
 
-# Create sessions directory (used by session.bash)
+# Create sessions & data directory
 RUN mkdir -p /app/sessions /app/data
 
 # Create app user
@@ -34,12 +38,14 @@ RUN chown -R appuser:appuser /app/sessions /app/data
 USER appuser
 
 # Expose the server port
-EXPOSE 8080
+EXPOSE 8000
 
 # Environment defaults (can be overridden)
 ENV HOST=127.0.0.1
 ENV PORT=8080
 
 # Start the server
-ENTRYPOINT ["/bin/bash", "server.bash"]
+#   - bash server in background
+#   - nginx in foreground (proper signal handling + logs)
+ENTRYPOINT ["sh", "-c", "./server.bash & exec nginx -g 'daemon off;'"]
 

@@ -1,9 +1,11 @@
 
 .git
 .gitignore
+
 Dockerfile
 docker-compose.yml
 .dockerignore
+
 getfiles.txt
 nohup.out
 *.swp
@@ -11,7 +13,6 @@ nohup.out
 
 .env*
 getfiles.sh
-proxy.nginx
 
 sessions
 data
