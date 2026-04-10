@@ -35,9 +35,9 @@ unset _key _val
 
 # Read request body (if any)
 BODY_RAW=""
-CONTENT_LENGTH="${REQUEST_HEADERS[content-length]:-0}"
+_content_length="${REQUEST_HEADERS[content-length]:-0}"
 export MAX_BODY=1048576 # 1MB
-if (( CONTENT_LENGTH > MAX_BODY )); then
+if (( _content_length > MAX_BODY )); then
   echo "Received Payload too large" >&2
   _body="413 Payload too large"
   HEADERS["content-type"]="text/plain"
@@ -49,10 +49,11 @@ if (( CONTENT_LENGTH > MAX_BODY )); then
   printf "%s" "${_body}"
   exit 1
 fi
-if [[ "${CONTENT_LENGTH}" =~ ^[0-9]+$ ]] && (( CONTENT_LENGTH > 0 )) ; then
-  IFS= read -r -n "${CONTENT_LENGTH}" BODY_RAW || true
+if [[ "${_content_length}" =~ ^[0-9]+$ ]] && (( _content_length > 0 )) ; then
+  IFS= read -r -n "${_content_length}" BODY_RAW || true
 fi
 export BODY_RAW
+unset _content_length
 
 _xff="${REQUEST_HEADERS[x-forwarded-for]:-}"
 _xreal="${REQUEST_HEADERS[x-real-ip]:-}"
@@ -63,6 +64,7 @@ if [[ -n "${_xff}" ]] ; then
   _xff="${_xff%"${_xff##*[![:space:]]}"}"
 fi
 export REMOTE_ADDR="$(_pick "${_xff}" "${_xreal}" "${SOCAT_PEERADDR:-}" "${NCAT_REMOTE_ADDR:-}" "${NCAT_REMOTE_IP:-}")"
+unset _xff _xreal
 REMOTE_ADDR="${REMOTE_ADDR:-unknown}"
 export REMOTE_PORT="$(_pick "${REQUEST_HEADERS[x-forwarded-port]:-}" "${REQUEST_HEADERS[x-real-port]:-}" "${SOCAT_PEERPORT:-}" "${NCAT_REMOTE_PORT:-}")"
 REMOTE_PORT="${REMOTE_PORT:-unknown}"
@@ -124,10 +126,9 @@ unset _key _val _p _pairs
 declare -A BODY
 export BODY
 
-CONTENT_TYPE="${REQUEST_HEADERS[content-type]:-}"
-
 # Only parse urlencoded bodies
-if [[ "${METHOD}" =~ ^(post|put|patch)$ ]] && [[ "${CONTENT_TYPE}" == *"application/x-www-form-urlencoded"* ]]; then
+_content_type="${REQUEST_HEADERS[content-type]:-}"
+if [[ "${METHOD}" =~ ^(post|put|patch)$ ]] && [[ "${_content_type}" == *"application/x-www-form-urlencoded"* ]]; then
   if [[ -n "${BODY_RAW}" ]]; then
     IFS='&' read -r -a _pairs <<< "${BODY_RAW}"
     for _p in "${_pairs[@]}"; do
@@ -145,7 +146,7 @@ if [[ "${METHOD}" =~ ^(post|put|patch)$ ]] && [[ "${CONTENT_TYPE}" == *"applicat
     done
   fi
 fi
-unset _key _val _p _pairs
+unset _key _val _p _pairs _content_type
 
 declare -A COOKIES
 export COOKIES
