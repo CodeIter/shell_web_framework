@@ -199,7 +199,11 @@ elif [[ -f "./router.d${WEBPATH}/${METHOD}.bash" ]] ; then
   source "./router.d${WEBPATH}/${METHOD}.bash"
 fi
 
-if [[ -f "${FILE}" ]]; then
+if [[ -f "${ROOT}/${WEBPATH}/index.bash" ]]; then
+  source "${ROOT}/${WEBPATH}/index.bash"
+elif [[ -f "${ROOT}/${WEBPATH}/index.sh" ]]; then
+  source "${ROOT}/${WEBPATH}/index.sh"
+elif [[ -f "${FILE}" ]]; then
   if [[ "${FILE##*.}" = "sh" ]] || [[ "${FILE##*.}" = "bash" ]] ; then
     source "${FILE}"
   else
@@ -242,5 +246,5 @@ else
 fi
 unset _ct _body
 
-exit
+exit 0
 
