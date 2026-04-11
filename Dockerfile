@@ -10,7 +10,8 @@ RUN apk add --no-cache \
     openssl \
     jq \
     ca-certificates \
-    nginx
+    nginx \
+    perl
 
 # Set working directory
 WORKDIR /app
