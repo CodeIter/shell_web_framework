@@ -204,18 +204,55 @@ if [[ -f "${ROOT}/${WEBPATH}/index.bash" ]]; then
 elif [[ -f "${ROOT}/${WEBPATH}/index.sh" ]]; then
   source "${ROOT}/${WEBPATH}/index.sh"
 elif [[ -f "${FILE}" ]]; then
-  if [[ "${FILE##*.}" = "sh" ]] || [[ "${FILE##*.}" = "bash" ]] ; then
+  if [[ "${FILE##*.}" =~ ^(bash|sh)$ ]] ; then
     source "${FILE}"
   else
-    _ct="$(mime_type "${FILE}")"
-    SIZE=$(stat -c%s "${FILE}" 2>/dev/null || wc -c <"${FILE}")
-    HEADERS["content-type"]="${_ct}"
-    HEADERS["content-length"]="${SIZE}"
-    HEADERS["connection"]="close"
-    print_status "200" "OK"
-    print_headers
-    print_crnl
-    cat "${FILE}"
+    if [[ "${FILE##*.}" =~ ^(html|htm|xhtml|shtml)$ ]] ; then
+      _ct="$(mime_type "${FILE}")"
+      mkdir -p tmp
+      _tempfile=$(mktemp tmp/tempfile-XXXXXX)
+      cp -f "${FILE}" "${_tempfile}"
+      # Execute code inside <? ... ?> and replace the block with the
+      # command's stdout.
+      # -0777 slurps whole file, s///gs allows multiline and non-greedy
+      # match, e evaluates replacement.
+      perl -0777 -pe '
+      s{<\?(.+?)\?>}{
+          do {
+              my $cmd = $1;
+              chomp $cmd;
+              open my $fh, "-|", "bash", "-c", $cmd
+                  or die "bash -c failed: $!";
+              local $/;
+              my $out = <$fh>;
+              close $fh;
+              $out =~ s/\r\z//;
+              $out;
+          }
+      }egs
+      ' "${_tempfile}" > "${_tempfile}.processed"
+      mv -f "${_tempfile}.processed" "${_tempfile}"
+      SIZE=$(stat -c%s "${_tempfile}" 2>/dev/null || wc -c <"${_tempfile}")
+      HEADERS["content-type"]="${_ct}"
+      HEADERS["content-length"]="${SIZE}"
+      HEADERS["connection"]="close"
+      print_status "200" "OK"
+      print_headers
+      print_crnl
+      cat "${_tempfile}"
+      rm -f "${_tempfile}"
+      unset _tempfile
+    else
+      _ct="$(mime_type "${FILE}")"
+      SIZE=$(stat -c%s "${FILE}" 2>/dev/null || wc -c <"${FILE}")
+      HEADERS["content-type"]="${_ct}"
+      HEADERS["content-length"]="${SIZE}"
+      HEADERS["connection"]="close"
+      print_status "200" "OK"
+      print_headers
+      print_crnl
+      cat "${FILE}"
+    fi
   fi
 elif [[ -d "${ROOT}/${WEBPATH}" ]] ; then
   for _f in "${ROOT}/${WEBPATH}"/*.sh "${ROOT}/${WEBPATH}"/*.bash ; do
