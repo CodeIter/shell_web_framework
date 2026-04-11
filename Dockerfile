@@ -27,13 +27,13 @@ RUN find . -type f \( -name "*.bash" -o -name "*.sh" \) \
            -exec chmod a+x {} +
 
 # Create sessions & data directory
-RUN mkdir -p /app/sessions /app/data
+RUN mkdir -p /app/sessions /app/data /app/tmp
 
 # Create app user
 RUN adduser -D appuser
 
 # Give ownership to sessions & data directories
-RUN chown -R appuser:appuser /app/sessions /app/data
+RUN chown -R appuser:appuser /app/sessions /app/data /app/tmp
 
 # Switch user
 USER appuser
