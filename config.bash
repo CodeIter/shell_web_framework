@@ -12,3 +12,9 @@ export SESSION_TTL="${SESSION_TTL:-86400}" # 1 day
 
 export SESSION_SECRET="${SESSION_SECRET:-change-this-secret-in-env}"
 
+export UPLOAD_DIR="${UPLOAD_DIR:-tmp/uploads}"
+export UPLOAD_MAX_SIZE="${UPLOAD_MAX_SIZE:-10485760}" # 10 MiB
+
+# Keep the request body limit at least a bit above the upload limit
+export MAX_BODY="${MAX_BODY:-$((UPLOAD_MAX_SIZE + 65536))}"
+

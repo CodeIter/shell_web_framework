@@ -35,8 +35,16 @@ unset _key _val
 
 # Read request body (if any)
 BODY_RAW=""
+BODY_FILE=""
 _content_length="${REQUEST_HEADERS[content-length]:-0}"
-export MAX_BODY=1048576 # 1MB
+
+export UPLOAD_DIR="${UPLOAD_DIR:-tmp/uploads}"
+export UPLOAD_MAX_SIZE="${UPLOAD_MAX_SIZE:-10485760}" # 10 MiB
+export MAX_BODY="${MAX_BODY:-$((UPLOAD_MAX_SIZE + 65536))}"
+if (( MAX_BODY < UPLOAD_MAX_SIZE + 65536 )); then
+  MAX_BODY="$((UPLOAD_MAX_SIZE + 65536))"
+fi
+
 if (( _content_length > MAX_BODY )); then
   echo "Received Payload too large" >&2
   _body="413 Payload too large"
@@ -49,11 +57,24 @@ if (( _content_length > MAX_BODY )); then
   printf "%s" "${_body}"
   exit 1
 fi
+
+BODY_FILE="$(mktemp tmp/body-XXXXXX)"
+trap '[[ -n "${BODY_FILE:-}" && -f "${BODY_FILE}" ]] && rm -f "${BODY_FILE}"' EXIT
+
 if [[ "${_content_length}" =~ ^[0-9]+$ ]] && (( _content_length > 0 )) ; then
-  IFS= read -r -n "${_content_length}" BODY_RAW || true
+  dd bs=1 count="${_content_length}" of="${BODY_FILE}" 2>/dev/null || true
+else
+  : > "${BODY_FILE}"
 fi
-export BODY_RAW
+
+export BODY_FILE
 unset _content_length
+
+declare -A UPLOAD_PATH
+declare -A UPLOAD_NAME
+declare -A UPLOAD_TYPE
+declare -A UPLOAD_SIZE
+export UPLOAD_PATH UPLOAD_NAME UPLOAD_TYPE UPLOAD_SIZE
 
 _xff="${REQUEST_HEADERS[x-forwarded-for]:-}"
 _xreal="${REQUEST_HEADERS[x-real-ip]:-}"
@@ -128,25 +149,33 @@ export BODY
 
 # Only parse urlencoded bodies
 _content_type="${REQUEST_HEADERS[content-type]:-}"
-if [[ "${METHOD}" =~ ^(post|put|patch)$ ]] && [[ "${_content_type}" == *"application/x-www-form-urlencoded"* ]]; then
-  if [[ -n "${BODY_RAW}" ]]; then
-    IFS='&' read -r -a _pairs <<< "${BODY_RAW}"
-    for _p in "${_pairs[@]}"; do
-      [[ -z "${_p}" ]] && continue
-      if [[ "${_p}" == *=* ]]; then
-        _key="${_p%%=*}"
-        _val="${_p#*=}"
-      else
-        _key="${_p}"
-        _val=""
-      fi
-      _key="$(urldecode "${_key}")"
-      _val="$(urldecode "${_val}")"
-      BODY["${_key}"]="${_val}"
-    done
+if [[ "${METHOD}" =~ ^(post|put|patch)$ ]] ; then
+  if [[ "${_content_type}" == *"application/x-www-form-urlencoded"* ]]; then
+    BODY_RAW="$(cat "${BODY_FILE}")"
+    if [[ -n "${BODY_RAW}" ]]; then
+      IFS='&' read -r -a _pairs <<< "${BODY_RAW}"
+      for _p in "${_pairs[@]}"; do
+        [[ -z "${_p}" ]] && continue
+        if [[ "${_p}" == *=* ]]; then
+          _key="${_p%%=*}"
+          _val="${_p#*=}"
+        else
+          _key="${_p}"
+          _val=""
+        fi
+        _key="$(urldecode "${_key}")"
+        _val="$(urldecode "${_val}")"
+        BODY["${_key}"]="${_val}"
+      done
+    fi
+  elif [[ "${_content_type}" == multipart/form-data* ]]; then
+    if [[ "${_content_type}" =~ boundary=\"?([^\";[:space:]]+)\"? ]]; then
+      _boundary="${BASH_REMATCH[1]}"
+      _parse_multipart_form "${BODY_FILE}" "${_boundary}"
+    fi
   fi
 fi
-unset _key _val _p _pairs _content_type
+unset _key _val _p _pairs _content_type _boundary
 
 declare -A COOKIES
 export COOKIES
