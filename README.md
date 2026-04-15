@@ -12,8 +12,7 @@ and static files from the `web/` tree. It supports signed session cookies,
 simple redirects, MIME-type detection, and embedded Bash execution inside
 HTML files for fast, scriptable pages.
 
-Perfect for embedded devices, IoT, quick prototypes, CTFs, or when you
-want to flex your shell skills.
+Perfect when you want to flex your shell skills.
 
 ## Features
 
@@ -29,6 +28,7 @@ want to flex your shell skills.
 - Security headers middleware
 - Redirect helpers
 - MIME type detection for common assets
+- File upload
 
 ## Requirements
 
