@@ -6,11 +6,9 @@
 **A minimalistic, Bash web server and framework.**
 
 A lightweight web framework built entirely in Bash for serving HTML and JSON,
-routing requests by path and method, handling middleware, parsing query
-strings, form bodies, cookies, and sessions, and serving both dynamic scripts
-and static files from the `web/` tree. It supports signed session cookies,
-simple redirects, MIME-type detection, and embedded Bash execution inside
-HTML files for fast, scriptable pages.
+routing requests by path and method, handling middleware, and serving both
+dynamic scripts and static files from the `web/` tree. It supports embedded
+Bash execution inside HTML files for fast, scriptable pages.
 
 Perfect when you want to flex your shell skills.
 
