@@ -35,6 +35,7 @@ Perfect when you want to flex your shell skills.
 - `openssl` (for session signing)
 - `perl` (for `<? ?>` template processing)
 - `jq` (for `json_get` request body helper)
+- `sed` (GNU sed)
 
 - `nginx` (for the provided container setup)
 - Docker + Compose

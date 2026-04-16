@@ -7,8 +7,9 @@ RUN apk add --no-cache \
     bash \
     socat \
     coreutils \
-    openssl \
+    sed \
     jq \
+    openssl \
     ca-certificates \
     nginx \
     perl

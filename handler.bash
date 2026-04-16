@@ -113,12 +113,12 @@ if [[ -z "${WEBPATH}" ]]; then
   export WEBPATH="/"
 fi
 
-WEBPATH="$(sed -sure 's~/\.\.?/~/~g;s~/+~/~g' <<< "${WEBPATH}")"
+WEBPATH="$(sed -Ee 's~/\.\.?/~/~g;s~/+~/~g' <<< "${WEBPATH}")"
 
 export ROOT="${PWD}/web"
 
 export FILE="${ROOT}/${WEBPATH}"
-FILE="$(sed -sure 's~/+~/~g' <<< "${FILE}")"
+FILE="$(sed -Ee 's~/+~/~g' <<< "${FILE}")"
 if ! [[ -f "${FILE}" ]] && [[ "${FILE}" = */ ]] ; then
   FILE+="index.html"
 fi
