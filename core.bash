@@ -36,7 +36,7 @@ print_response() {
 
 # Print status
 print_status() {
-  printf '%s %s %s\n\r' "HTTP/1.1" "${1:-200}" "${2:-OK}"
+  printf '%s %s %s\r\n' "HTTP/1.1" "${1:-200}" "${2:-OK}"
 }
 
 # Print headers
