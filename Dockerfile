@@ -19,8 +19,11 @@ WORKDIR /app
 # Copy project files
 COPY . .
 
-# Copy and activate nginx reverse-proxy config
-COPY proxy.nginx /etc/nginx/conf.d/default.conf
+# Copy and activate nginx as main config
+COPY proxy.nginx /etc/nginx/nginx.conf
+
+# Ensure nginx log directory exists (root can write)
+RUN mkdir -p /var/log/nginx /var/run
 
 # Make scripts executable
 RUN find . -type f \( -name "*.bash" -o -name "*.sh" \) \
@@ -28,15 +31,6 @@ RUN find . -type f \( -name "*.bash" -o -name "*.sh" \) \
 
 # Create sessions & data directory
 RUN mkdir -p /app/sessions /app/data /app/tmp
-
-# Create app user
-RUN adduser -D appuser
-
-# Give ownership to sessions & data directories
-RUN chown -R appuser:appuser /app/sessions /app/data /app/tmp
-
-# Switch user
-USER appuser
 
 # Expose the server port
 EXPOSE 8000
