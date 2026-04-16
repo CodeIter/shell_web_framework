@@ -36,8 +36,8 @@ RUN mkdir -p /app/sessions /app/data /app/tmp
 EXPOSE 8000
 
 # Environment defaults (can be overridden)
-ENV HOST=127.0.0.1
-ENV PORT=8080
+ENV BASH_HOST=127.0.0.1
+ENV BASH_PORT=8080
 
 # Start the server
 #   - bash server in background
