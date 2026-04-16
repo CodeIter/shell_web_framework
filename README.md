@@ -1,4 +1,4 @@
-# Bash Web Framework
+# Shell Web Framework
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 ![Bash](https://img.shields.io/badge/Made%20with-Bash-4EAA25.svg)
