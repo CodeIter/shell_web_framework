@@ -2,6 +2,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 ![Bash](https://img.shields.io/badge/Made%20with-Bash-4EAA25.svg)
+[![Deploy to Koyeb](https://www.koyeb.com/static/images/deploy/button.svg)](https://app.koyeb.com/deploy?name=shell-web-framework&type=git&repository=CodeIter%2Fshell_web_framework&branch=main&builder=dockerfile&instance_type=free&regions=was&instances_min=0&autoscaling_sleep_idle_delay=3900&env%5BMAX_BODY%5D=10551296&env%5BSESSION_SECRET%5D=fdsryyhhDFHYRDG+FD%23%40%24%26%7C%7C4566208*%7B%5BCZddfghhhko456+7777&env%5BSESSION_TTL%5D=86400&env%5BUPLOAD_MAX_SIZE%5D=10485760)
 
 **A minimalistic, Bash web server and framework.**
 
