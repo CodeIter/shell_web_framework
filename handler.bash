@@ -119,9 +119,10 @@ export ROOT="${PWD}/web"
 
 export FILE="${ROOT}/${WEBPATH}"
 FILE="$(sed -Ee 's~/+~/~g' <<< "${FILE}")"
-if ! [[ -f "${FILE}" ]] && [[ "${FILE}" = */ ]] ; then
-  FILE+="index.html"
+if ! [[ -f "${FILE}" ]] ; then
+  FILE+="/index.html"
 fi
+FILE="$(sed -Ee 's~/+~/~g' <<< "${FILE}")"
 
 declare -A QUERY
 export QUERY
