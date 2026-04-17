@@ -3,4 +3,6 @@ getfiles.txt
 nohup.out
 .env
 tmp
+data
+sessions
 
