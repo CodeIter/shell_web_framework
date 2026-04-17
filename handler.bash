@@ -218,14 +218,85 @@ for _f in ./middleware.d/* ; do
   fi
 done
 
-if [[ -f "./router.d${WEBPATH}/all.sh" ]] ; then
-  source "./router.d${WEBPATH}/all.sh"
-elif [[ -f "./router.d${WEBPATH}/all.bash" ]] ; then
-  source "./router.d${WEBPATH}/all.bash"
-elif [[ -f "./router.d${WEBPATH}/${METHOD}.sh" ]] ; then
-  source "./router.d${WEBPATH}/${METHOD}.sh"
-elif [[ -f "./router.d${WEBPATH}/${METHOD}.bash" ]] ; then
-  source "./router.d${WEBPATH}/${METHOD}.bash"
+# === GENERIC DYNAMIC ROUTER (with :param support) ===
+#
+# - Exact routes continue to work unchanged (api/ip/get.bash, etc.)
+# - Dynamic paths are now supported using directories named ":param"
+#   Example: router.d/r/:short_id/get.bash  matches any /r/XXXXXX
+#   The captured value is automatically available as ROUTE_PARAMS[short_id]
+# Multiple / mixed static+dynamic segments are fully supported:
+#   router.d/users/:username/posts/:post_id/get.bash
+
+declare -A ROUTE_PARAMS
+export ROUTE_PARAMS
+ROUTER_SCRIPT=""
+
+_find_router_script() {
+  local webpath="${WEBPATH}"
+  local method="${METHOD}"
+  local router_base="./router.d"
+
+  # 1. Exact match (100% backward compatible)
+  for ext in bash sh; do
+    for variant in all "${method}"; do
+      local _script="${router_base}${webpath}/${variant}.${ext}"
+      [[ -f "${_script}" ]] && { ROUTER_SCRIPT="${_script}"; return 0; }
+    done
+  done
+
+  # 2. Dynamic match using :param directories
+  local -a segs
+  IFS='/' read -r -a segs <<< "${webpath#/}"
+  [[ "${#segs[@]}" -eq 0 || -z "${segs[0]}" ]] && segs=()
+
+  local current_router="${router_base}"
+  local i seg param_name
+
+  for ((i=0; i<${#segs[@]}; i++)); do
+    seg="${segs[i]}"
+
+    # Try exact directory first
+    local exact="${current_router}/${seg}"
+    if [[ -d "${exact}" ]]; then
+      current_router="${exact}"
+      continue
+    fi
+
+    # Try any :param directory at this level
+    local matched=0
+    for d in "${current_router}"/*; do
+      [[ -d "${d}" ]] || continue
+      local dirname="${d##*/}"
+      if [[ "${dirname}" == :* ]]; then
+        param_name="${dirname#:}"
+        [[ -n "${param_name}" ]] || continue
+        ROUTE_PARAMS["${param_name}"]="${seg}"
+        current_router="${d}"
+        matched=1
+        break
+      fi
+    done
+    (( matched == 1 )) && continue
+
+    # No match possible
+    return 1
+  done
+
+  # 3. At the final router directory, look for handler file
+  for ext in bash sh; do
+    for variant in all "${method}"; do
+      local _script="${current_router}/${variant}.${ext}"
+      [[ -f "${_script}" ]] && { ROUTER_SCRIPT="${_script}"; return 0; }
+    done
+  done
+
+  return 1
+}
+
+# Source the resolved router script (if any)
+_find_router_script || true
+if [[ -n "${ROUTER_SCRIPT:-}" ]]; then
+  source "${ROUTER_SCRIPT}"
 fi
 
 if [[ -f "${ROOT}/${WEBPATH}/index.bash" ]]; then
