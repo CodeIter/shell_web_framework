@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>URL Shortener</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 0; padding: 2rem; background: #f7f7f7; color: #111; }
+    main { max-width: 720px; margin: 0 auto; background: #fff; border-radius: 16px; padding: 24px; box-shadow: 0 8px 24px rgba(0,0,0,.08); }
+    label { display: block; margin: 0 0 .5rem; font-weight: 600; }
+    input, button { font: inherit; }
+    input { width: 100%; box-sizing: border-box; padding: .85rem 1rem; border: 1px solid #ccc; border-radius: 10px; margin-bottom: 1rem; }
+    button { padding: .85rem 1rem; border: 0; border-radius: 10px; cursor: pointer; }
+    .row { display: grid; gap: .75rem; }
+    .result, .status { margin-top: 1rem; }
+    a { word-break: break-all; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>URL Shortener</h1>
+    <p>Paste a long URL and create a short redirect.</p>
+
+    <form id="shortener-form" action="/api/url/shortener" method="post">
+      <label for="url">Long URL</label>
+      <input id="url" name="url" type="url" placeholder="https://example.com/very/long/link" required />
+      <div class="row">
+        <button type="submit">Shorten</button>
+      </div>
+    </form>
+
+    <div class="status" id="status" aria-live="polite"></div>
+    <div class="result" id="result"></div>
+  </main>
+
+  <script>
+    const form = document.getElementById('shortener-form');
+    const statusEl = document.getElementById('status');
+    const resultEl = document.getElementById('result');
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      statusEl.textContent = 'Shortening...';
+      resultEl.textContent = '';
+
+      try {
+        const body = new URLSearchParams(new FormData(form));
+        const response = await fetch(form.action, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
+          body
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || 'Request failed');
+        }
+
+        const shortUrl = data.short_url || new URL(`/r/${data.short_id}`, window.location.origin).href;
+        const link = document.createElement('a');
+        link.href = shortUrl;
+        link.textContent = shortUrl;
+        link.rel = 'noopener noreferrer';
+
+        statusEl.textContent = 'Done.';
+        resultEl.textContent = 'Short URL: ';
+        resultEl.appendChild(link);
+      } catch (err) {
+        statusEl.textContent = 'Failed.';
+        resultEl.textContent = String(err.message || err);
+      }
+    });
+  </script>
+</body>
+</html>
+
